@@ -22,6 +22,7 @@ AFRAME.registerComponent('photo-badge', {
     
     // Add the name tag below the photo
     let nameTag = document.createElement('a-text');
+    this.nameTag = nameTag; // Save reference
     nameTag.setAttribute('value', data.ownerName);
     nameTag.setAttribute('color', '#ffffff');
     nameTag.setAttribute('align', 'center');
@@ -32,5 +33,20 @@ AFRAME.registerComponent('photo-badge', {
 
     el.appendChild(border);
     el.appendChild(nameTag);
+  },
+
+  tick: function () {
+    let cameraEl = document.querySelector('a-camera');
+    if (!cameraEl || !this.nameTag) return;
+
+    let cameraPos = new THREE.Vector3();
+    cameraEl.object3D.getWorldPosition(cameraPos);
+    
+    let elPos = new THREE.Vector3();
+    this.el.object3D.getWorldPosition(elPos);
+
+    let distance = cameraPos.distanceTo(elPos);
+    let scaleFactor = Math.max(1, Math.min(distance * 0.8, 3));
+    this.nameTag.setAttribute('scale', `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
   }
 });

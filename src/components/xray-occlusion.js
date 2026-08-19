@@ -16,6 +16,7 @@ AFRAME.registerComponent('xray-occlusion', {
     
     // Add text label
     let text = document.createElement('a-text');
+    this.textEl = text; // Save reference
     text.setAttribute('value', 'Active Items\nInside');
     text.setAttribute('color', '#00ffff');
     text.setAttribute('align', 'center');
@@ -24,5 +25,20 @@ AFRAME.registerComponent('xray-occlusion', {
 
     el.appendChild(core);
     el.appendChild(text);
+  },
+
+  tick: function () {
+    let cameraEl = document.querySelector('a-camera');
+    if (!cameraEl || !this.textEl) return;
+
+    let cameraPos = new THREE.Vector3();
+    cameraEl.object3D.getWorldPosition(cameraPos);
+    
+    let elPos = new THREE.Vector3();
+    this.el.object3D.getWorldPosition(elPos);
+
+    let distance = cameraPos.distanceTo(elPos);
+    let scaleFactor = Math.max(1, Math.min(distance * 0.8, 3));
+    this.textEl.setAttribute('scale', `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
   }
 });

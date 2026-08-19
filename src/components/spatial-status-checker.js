@@ -12,6 +12,7 @@ AFRAME.registerComponent('spatial-status-checker', {
 
     // We can add simple UI text above the object
     let textEl = document.createElement('a-text');
+    this.textEl = textEl; // Store reference for tick function
     textEl.setAttribute('position', '0 1 0');
     textEl.setAttribute('align', 'center');
     textEl.setAttribute('scale', '1 1 1');
@@ -48,5 +49,23 @@ AFRAME.registerComponent('spatial-status-checker', {
     }
     
     el.appendChild(textEl);
+  },
+
+  tick: function () {
+    // Dynamic UI Distance Scaling
+    let cameraEl = document.querySelector('a-camera');
+    if (!cameraEl) return;
+
+    let cameraPos = new THREE.Vector3();
+    cameraEl.object3D.getWorldPosition(cameraPos);
+    
+    let elPos = new THREE.Vector3();
+    this.el.object3D.getWorldPosition(elPos);
+
+    let distance = cameraPos.distanceTo(elPos);
+    
+    // Scale up slightly as user gets further away (min 1, max 3)
+    let scaleFactor = Math.max(1, Math.min(distance * 0.8, 3));
+    this.textEl.setAttribute('scale', `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
   }
 });

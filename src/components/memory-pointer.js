@@ -26,6 +26,7 @@ AFRAME.registerComponent('memory-pointer', {
     
     // Add text label
     let text = document.createElement('a-text');
+    this.textEl = text; // Save reference
     text.setAttribute('value', data.itemName);
     text.setAttribute('color', '#f1c40f');
     text.setAttribute('align', 'center');
@@ -34,5 +35,20 @@ AFRAME.registerComponent('memory-pointer', {
 
     el.appendChild(base);
     el.appendChild(text);
+  },
+
+  tick: function () {
+    let cameraEl = document.querySelector('a-camera');
+    if (!cameraEl || !this.textEl) return;
+
+    let cameraPos = new THREE.Vector3();
+    cameraEl.object3D.getWorldPosition(cameraPos);
+    
+    let elPos = new THREE.Vector3();
+    this.el.object3D.getWorldPosition(elPos);
+
+    let distance = cameraPos.distanceTo(elPos);
+    let scaleFactor = Math.max(1, Math.min(distance * 0.8, 3));
+    this.textEl.setAttribute('scale', `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
   }
 });

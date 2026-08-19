@@ -29,6 +29,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const prodTools = document.getElementById('prod-tools');
   const toolButtons = document.querySelectorAll('.tool-group button');
   const instructions = document.getElementById('instructions');
+  const btnClear = document.getElementById('btn-clear');
+
+  btnClear.addEventListener('click', () => {
+    localStorage.removeItem('project-identity-anchors');
+    // Remove all spawned entities
+    document.querySelectorAll('.spawned-item').forEach(el => el.parentNode.removeChild(el));
+    console.log("Room cleared!");
+  });
 
   // Mode Switching
   btnAssist.addEventListener('click', () => {
@@ -76,6 +84,9 @@ AFRAME.registerComponent('tap-to-place', {
           scene.setAttribute('ar-hit-test', 'target: #placement-manager;');
         }
         
+        // Restore saved items
+        this.restoreItems();
+
         // Listen for screen taps
         scene.addEventListener('select', (e) => {
           this.spawnItem();
@@ -84,23 +95,23 @@ AFRAME.registerComponent('tap-to-place', {
     });
   },
 
-  spawnItem: function() {
-    // In a real app, we'd use the hit-test intersection point.
-    // For this prototype, we'll spawn the item 1.5 meters in front of the camera
-    let cameraEl = document.querySelector('a-camera');
-    let worldPos = new THREE.Vector3();
-    cameraEl.object3D.getWorldPosition(worldPos);
-    let worldDir = new THREE.Vector3();
-    cameraEl.object3D.getWorldDirection(worldDir);
-    
-    // Spawn position = camera pos + (camera dir * distance)
-    let distance = 1.5;
-    let spawnPos = worldPos.add(worldDir.multiplyScalar(distance));
-    
-    let newEl = document.createElement('a-entity');
-    newEl.setAttribute('position', `${spawnPos.x} ${spawnPos.y} ${spawnPos.z}`);
+  restoreItems: function() {
+    let saved = localStorage.getItem('project-identity-anchors');
+    if (saved) {
+      let items = JSON.parse(saved);
+      items.forEach(item => {
+        this.createEntity(item.tool, new THREE.Vector3(item.x, item.y, item.z), false);
+      });
+      console.log(`Restored ${items.length} items`);
+    }
+  },
 
-    switch(currentTool) {
+  createEntity: function(toolType, posVector, saveToStorage = true) {
+    let newEl = document.createElement('a-entity');
+    newEl.setAttribute('position', `${posVector.x} ${posVector.y} ${posVector.z}`);
+    newEl.classList.add('spawned-item');
+
+    switch(toolType) {
       case 'xray':
         newEl.setAttribute('xray-occlusion', '');
         break;
@@ -122,6 +133,29 @@ AFRAME.registerComponent('tap-to-place', {
     }
 
     this.el.sceneEl.appendChild(newEl);
+
+    if (saveToStorage) {
+      let saved = localStorage.getItem('project-identity-anchors');
+      let items = saved ? JSON.parse(saved) : [];
+      items.push({ tool: toolType, x: posVector.x, y: posVector.y, z: posVector.z });
+      localStorage.setItem('project-identity-anchors', JSON.stringify(items));
+    }
+  },
+
+  spawnItem: function() {
+    // In a real app, we'd use the hit-test intersection point.
+    // For this prototype, we'll spawn the item 1.5 meters in front of the camera
+    let cameraEl = document.querySelector('a-camera');
+    let worldPos = new THREE.Vector3();
+    cameraEl.object3D.getWorldPosition(worldPos);
+    let worldDir = new THREE.Vector3();
+    cameraEl.object3D.getWorldDirection(worldDir);
+    
+    // Spawn position = camera pos + (camera dir * distance)
+    let distance = 1.5;
+    let spawnPos = worldPos.add(worldDir.multiplyScalar(distance));
+    
+    this.createEntity(currentTool, spawnPos, true);
   }
 });
 
