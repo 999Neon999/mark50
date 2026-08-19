@@ -1,0 +1,17 @@
+{
+  "name": "project-identity-quest3s",
+  "version": "1.0.0",
+  "description": "Project Identity (Meta Quest 3S Edition) WebXR Prototype",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "aframe": "^1.5.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

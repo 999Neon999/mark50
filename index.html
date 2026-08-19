@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Identity - Quest 3S Edition</title>
+  <!-- Import A-Frame -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <!-- Import custom logic -->
+  <script type="module" src="/src/app.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+    }
+  </style>
+</head>
+<body>
+  <!-- A-Frame Scene with AR capabilities -->
+  <!-- webxr setup for passthrough and hit-test -->
+  <a-scene webxr="optionalFeatures: hit-test, local-floor;" background="color: transparent" renderer="alpha: true;">
+    
+    <!-- Camera rig -->
+    <a-entity id="rig" position="0 1.6 0">
+      <a-camera position="0 0 0" look-controls="pointerLockEnabled: false"></a-camera>
+      
+      <!-- Hand Tracking / Controllers for Meta Quest 3S -->
+      <a-entity laser-controls="hand: left" raycaster="objects: .clickable; far: 5"></a-entity>
+      <a-entity laser-controls="hand: right" raycaster="objects: .clickable; far: 5"></a-entity>
+    </a-entity>
+
+    <!-- Example Anchors in Space -->
+    <!-- 1. Allergen Warning Example -->
+    <a-box 
+      position="-1 1.5 -2" 
+      scale="0.3 0.3 0.3"
+      color="#CCC"
+      spatial-status-checker="isAllergen: true; assignedUser: 'Alex'">
+      <!-- The component logic will override appearance if it's an allergen -->
+    </a-box>
+
+    <!-- 2. Freshness Tracker Example (Safe) -->
+    <a-cylinder
+      position="0 1.2 -2"
+      scale="0.2 0.3 0.2"
+      color="#FFF"
+      spatial-status-checker="expiryDays: 5; isAllergen: false">
+    </a-cylinder>
+
+    <!-- 3. Freshness Tracker Example (Expired) -->
+    <a-cylinder
+      position="1 1.2 -2"
+      scale="0.2 0.3 0.2"
+      color="#FFF"
+      spatial-status-checker="expiryDays: 0; isAllergen: false">
+    </a-cylinder>
+
+    <!-- Basic lighting to illuminate objects -->
+    <a-light type="ambient" color="#888"></a-light>
+    <a-light type="directional" position="-1 2 1" intensity="0.8"></a-light>
+  </a-scene>
+</body>
+</html>
